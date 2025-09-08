@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Profile - AI Course Management{% endblock %}
+{% block content %}
+  <div class="page-header">
+    <h1 class="page-title">Academic Profile</h1>
+    <p class="page-subtitle">Manage your personal and academic information</p>
+  </div>
+  
+  <div class="content-container">
+    <div class="profile-card">
+      <form method="POST" class="profile-form">
+        <div class="form-section">
+          <h3 class="section-title">Account Information</h3>
+          <div class="form-group">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" id="email" class="form-input" value="{{ current_user.email }}" disabled>
+            <p class="form-help">Email address cannot be changed</p>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3 class="section-title">Academic Information</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="college" class="form-label">College/University</label>
+              <input type="text" id="college" name="college" class="form-input" 
+                     value="{{ current_user.college or '' }}" 
+                     placeholder="e.g., MIT, Stanford University">
+            </div>
+            
+            <div class="form-group">
+              <label for="degree" class="form-label">Degree Program</label>
+              <input type="text" id="degree" name="degree" class="form-input" 
+                     value="{{ current_user.degree or '' }}" 
+                     placeholder="e.g., Computer Science, Business Administration">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="years" class="form-label">Study Years</label>
+            <input type="text" id="years" name="years" class="form-input" 
+                   value="{{ current_user.years or '' }}" 
+                   placeholder="e.g., 2022-2026">
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary-custom">Save Changes</button>
+          <a href="{{ url_for('dashboard') }}" class="btn-secondary-custom">Back to Dashboard</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Edit Course - AI Course Management{% endblock %}
+{% block content %}
+  <div class="page-header">
+    <h1 class="page-title">Edit Course</h1>
+    <p class="page-subtitle">Update course information and details</p>
+  </div>
+  
+  <div class="content-container">
+    <div class="edit-course-card">
+      <form method="POST" class="edit-course-form">
+        <div class="form-section">
+          <h3 class="section-title">Course Details</h3>
+          
+          <div class="form-group">
+            <label for="name" class="form-label">Course Name</label>
+            <input type="text" id="name" name="name" class="form-input" 
+                   value="{{ course.name }}" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="description" class="form-label">Course Description</label>
+            <textarea id="description" name="description" class="form-input" rows="4"
+                      placeholder="Describe the course content, objectives, and key topics...">{{ course.description or '' }}</textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="credits" class="form-label">Credit Hours</label>
+            <input type="number" id="credits" name="credits" class="form-input" 
+                   value="{{ course.credits }}" min="1" max="6">
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary-custom">Save Changes</button>
+          <a href="{{ url_for('semester_view', sem=course.semester) }}" class="btn-secondary-custom">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

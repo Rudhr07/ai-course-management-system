@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Sign Up - AI Course Management{% endblock %}
+{% block content %}
+  <div class="auth-page">
+    <div class="auth-container">
+      <div class="auth-header">
+        <div class="auth-logo">
+          <img src="{{ url_for('static', filename='logo.png') }}" alt="AI Course Management Logo">
+        </div>
+        <h1 class="auth-title">Create account</h1>
+        <p class="auth-subtitle">Get started with your academic journey</p>
+      </div>
+
+      <form method="POST" class="auth-form">
+        <div class="form-group">
+          <label for="email" class="form-label">Email address</label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            class="form-input" 
+            placeholder="Enter your email"
+            required 
+            autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            class="form-input" 
+            placeholder="Create a password"
+            required 
+            autocomplete="new-password">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="college" class="form-label">University</label>
+            <input 
+              type="text" 
+              id="college" 
+              name="college" 
+              class="form-input" 
+              placeholder="Christ"
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="degree" class="form-label">Degree</label>
+            <input 
+              type="text" 
+              id="degree" 
+              name="degree" 
+              class="form-input" 
+              placeholder="Computer Science"
+              required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="years" class="form-label">Study period</label>
+          <input 
+            type="text" 
+            id="years" 
+            name="years" 
+            class="form-input" 
+            placeholder="2022-2026"
+            required>
+        </div>
+
+        <button type="submit" class="btn-primary-custom">
+          Create account
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Already have an account? <a href="{{ url_for('login') }}" class="auth-link">Sign in</a></p>
+      </div>
+    </div>
+  </div>
+{% endblock %}

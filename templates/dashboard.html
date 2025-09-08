@@ -1,0 +1,375 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard - AI Course Management{% endblock %}
+{% block content %}
+  <div class="page-header">
+    <h1 class="page-title">Academic Dashboard</h1>
+    <p class="page-subtitle">Organize your courses across semesters and get AI-powered insights to enhance your academic journey</p>
+  </div>
+  
+  <div class="semester-grid">
+    {% for s in range(1,9) %}
+    <div class="semester-card" data-url="{{ url_for('semester_view', sem=s) }}">
+      <div class="semester-number">{{ s }}</div>
+      <div class="semester-title">Semester {{ s }}</div>
+      <div class="semester-subtitle">{{ current_user.courses|selectattr('semester', 'equalto', s)|list|length }} courses enrolled</div>
+      <a href="{{ url_for('semester_view', sem=s) }}" class="btn-primary-custom">
+        Manage Courses
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- AI Chatbot Widget (bottom-right) -->
+  <div id="ai-chatbot-widget">
+    <button id="ai-chatbot-button" class="chatbot-toggle">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        <circle cx="9" cy="10" r="1"></circle>
+        <circle cx="15" cy="10" r="1"></circle>
+        <path d="M9 14s1 1 3 1 3-1 3-1"></path>
+      </svg>
+    </button>
+    
+    <div id="ai-chatbot-box" class="chatbot-panel">
+      <div class="chatbot-header">
+        <div class="chatbot-title">
+          <div class="chatbot-avatar">🤖</div>
+          <div>
+            <div class="chatbot-name">AI Assistant</div>
+            <div class="chatbot-status">Online</div>
+          </div>
+        </div>
+        <button id="ai-chatbot-close" class="chatbot-close">×</button>
+      </div>
+      
+      <div id="ai-chatbot-messages" class="chatbot-messages">
+        <div class="bot-message initial">
+          Hi! I'm here to help with your courses. Ask me anything or use the quick actions below.
+        </div>
+      </div>
+
+      <div class="chatbot-quick-actions">
+        <button class="quick-action" onclick="document.getElementById('ai-query').value='What should I study today?'; document.getElementById('ai-chat-form').dispatchEvent(new Event('submit'));">
+          Study Tips
+        </button>
+        <button class="quick-action" onclick="document.getElementById('ai-query').value='Help me plan my semester'; document.getElementById('ai-chat-form').dispatchEvent(new Event('submit'));">
+          Plan Semester
+        </button>
+      </div>
+
+      <form id="ai-chat-form" class="chatbot-form">
+        <div class="chatbot-input-group">
+          <input id="ai-query" name="query" type="text" placeholder="Ask me anything..." class="chatbot-input" required>
+          <button type="submit" class="chatbot-send">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22,2 15,22 11,13 2,9"></polygon>
+            </svg>
+          </button>
+        </div>
+      </form>
+
+      <div class="chatbot-divider">
+        <span>Quick Summarize</span>
+      </div>
+
+      <form id="ai-summarize-form" class="chatbot-summarize">
+        <select id="ai-summary-semester" name="semester" class="chatbot-select" required>
+          <option value="">Choose semester...</option>
+          {% for s in range(1,9) %}
+          <option value="{{ s }}">Semester {{ s }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn-primary-custom">Summarize</button>
+      </form>
+    </div>
+  </div>
+
+  <style>
+    #ai-chatbot-widget {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1000;
+      font-family: inherit;
+    }
+
+    .semester-card {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .semester-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .chatbot-toggle {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+      border: none;
+      color: white;
+      cursor: pointer;
+      box-shadow: var(--shadow-lg);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chatbot-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+    }
+
+    .chatbot-panel {
+      position: absolute;
+      bottom: 70px;
+      right: 0;
+      width: 380px;
+      max-width: calc(100vw - 48px);
+      background: var(--bg-primary);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-light);
+      display: none;
+      animation: slideUp 0.3s ease;
+    }
+
+    .chatbot-panel.open {
+      display: block;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .chatbot-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .chatbot-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .chatbot-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--success) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .chatbot-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+    }
+
+    .chatbot-status {
+      font-size: 0.75rem;
+      color: var(--success);
+    }
+
+    .chatbot-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 1.25rem;
+      transition: all 0.2s ease;
+    }
+
+    .chatbot-close:hover {
+      background: var(--border-light);
+      color: var(--text-primary);
+    }
+
+    .chatbot-messages {
+      height: 300px;
+      overflow-y: auto;
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .bot-message, .user-message {
+      max-width: 85%;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-lg);
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .bot-message {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      align-self: flex-start;
+      border-bottom-left-radius: 0.25rem;
+    }
+
+    .user-message {
+      background: var(--primary);
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 0.25rem;
+    }
+
+    .bot-message.initial {
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+      border: 1px solid var(--border-light);
+    }
+
+    .chatbot-quick-actions {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .quick-action {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .quick-action:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .chatbot-form {
+      padding: 0 1.25rem 1rem;
+    }
+
+    .chatbot-input-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .chatbot-input {
+      flex: 1;
+      border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .chatbot-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+    }
+
+    .chatbot-send {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      border: none;
+      background: var(--primary);
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chatbot-send:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .chatbot-divider {
+      margin: 1rem 1.25rem;
+      text-align: center;
+      position: relative;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .chatbot-divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--border-light);
+      z-index: 1;
+    }
+
+    .chatbot-divider span {
+      background: var(--bg-primary);
+      padding: 0 1rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .chatbot-summarize {
+      padding: 0 1.25rem 1.25rem;
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .chatbot-select {
+      flex: 1;
+      border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      outline: none;
+      background: var(--bg-primary);
+    }
+
+    .chatbot-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+    }
+
+    @media (max-width: 768px) {
+      #ai-chatbot-widget {
+        bottom: 16px;
+        right: 16px;
+      }
+
+      .chatbot-panel {
+        width: calc(100vw - 32px);
+        bottom: 70px;
+        right: -8px;
+      }
+    }
+  </style>
+
+  <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+{% endblock %}
