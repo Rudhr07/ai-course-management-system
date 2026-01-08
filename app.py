@@ -38,14 +38,25 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# Create database tables automatically on startup (for Vercel)
-with app.app_context():
-    try:
-        db.create_all()
-    except Exception as e:
-        print(f"Database initialization error: {e}")
-        # Re-raise to make error visible in Vercel logs
-        raise
+# Flag to track if database has been initialized
+_db_initialized = False
+
+def init_db():
+    """Initialize database tables. Safe to call multiple times."""
+    global _db_initialized
+    if not _db_initialized:
+        try:
+            db.create_all()
+            _db_initialized = True
+            print("Database tables created successfully")
+        except Exception as e:
+            print(f"Database initialization error: {e}")
+            raise
+
+@app.before_request
+def ensure_db_initialized():
+    """Ensure database tables exist before handling any request."""
+    init_db()
 
 
 # Models
