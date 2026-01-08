@@ -1,6 +1,6 @@
 # 🎓 AI Course Management System
 
-> **Demo Video**: [Add your demo video URL here]
+> **Demo Video**: (https://drive.google.com/file/d/1i2hNeljiZyZt-EjmqYQrfsThlWAGfrgM/view)
 
 A modern, AI-powered course management system built with Flask and integrated with Ollama for intelligent academic assistance.
 
@@ -51,11 +51,6 @@ A modern, AI-powered course management system built with Flask and integrated wi
 - **Llama3** - Language model for AI assistance
 - **Requests 2.31.0** - HTTP client for API communication
 
-### **Frontend**
-- **Bootstrap 5.3** - UI framework
-- **Inter Font** - Modern typography
-- **Custom CSS** - Professional styling and animations
-- **Vanilla JavaScript** - Interactive features and real-time chat
 
 ### **Features**
 - **Streaming Responses** - Real-time AI chat like ChatGPT
@@ -225,12 +220,6 @@ ai-course-management/
 ## 🤝 Contributing
 
 Feel free to submit issues, fork the repository, and create pull requests for any improvements.
-
----
-
-## 📝 License
-
-This project is open source and available under the [MIT License](LICENSE).
 
 ---
 
