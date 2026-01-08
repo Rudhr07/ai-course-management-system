@@ -7,12 +7,14 @@
 ```bash
 SECRET_KEY=<generate-with-openssl-rand-hex-32>
 GROQ_API_KEY=gsk_<your-groq-api-key>
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/ai_course_db
 ```
 
-### 2. **Vercel Postgres Database**
+### 2. **MongoDB Atlas Database** (FREE)
 
-- Create in Vercel Dashboard → **Storage** → **Postgres**
-- `DATABASE_URL` is auto-added by Vercel
+- Create at [cloud.mongodb.com](https://cloud.mongodb.com/)
+- FREE M0 tier (512 MB storage)
+- See [MONGODB_ATLAS_SETUP.md](MONGODB_ATLAS_SETUP.md) for detailed guide
 
 ### 3. **Files Already Configured** ✅
 
@@ -42,8 +44,13 @@ git push origin main
 1. **Add Variables**: Settings → Environment Variables
    - `SECRET_KEY` = (run: `openssl rand -hex 32`)
    - `GROQ_API_KEY` = (from [console.groq.com](https://console.groq.com/))
+   - `MONGODB_URI` = (from [cloud.mongodb.com](https://cloud.mongodb.com/))
 
-2. **Add Database**: Storage → Create Database → Postgres
+2. **Create MongoDB Atlas** (see [MONGODB_ATLAS_SETUP.md](MONGODB_ATLAS_SETUP.md)):
+   - Sign up at cloud.mongodb.com
+   - Create FREE M0 cluster
+   - Get connection string
+   - Add to Vercel as `MONGODB_URI`
 
 3. **Redeploy**: Deployments → Click ⋯ → Redeploy
 
@@ -63,13 +70,36 @@ git push origin main
 
 ---
 
+## 🍃 Get MongoDB Atlas (FREE)
+
+**Quick Setup** (10 minutes):
+
+1. Go to [cloud.mongodb.com](https://cloud.mongodb.com/)
+2. Sign up (free, no credit card)
+3. Create **M0 FREE** cluster
+4. Create database user (save password!)
+5. Whitelist IP: `0.0.0.0/0` (for Vercel)
+6. Get connection string
+7. Replace `<password>` and add database name
+
+**Detailed Guide**: See [MONGODB_ATLAS_SETUP.md](MONGODB_ATLAS_SETUP.md)
+
+**Connection String Format:**
+```
+mongodb+srv://username:password@cluster.mongodb.net/ai_course_db?retryWrites=true&w=majority
+```
+
+---
+
 ## 🐛 Troubleshooting
 
 | Error | Solution |
 |-------|----------|
 | "Secret key required" | Set `SECRET_KEY` in Vercel env vars |
 | "AI not responding" | Set `GROQ_API_KEY` in Vercel env vars |
-| "Database error" | Create Vercel Postgres in Storage tab |
+| "Database error" | Set `MONGODB_URI` in Vercel env vars |
+| "Connection timeout" | Whitelist `0.0.0.0/0` in MongoDB Atlas |
+| "Authentication failed" | Check password in MongoDB connection string |
 | "Module not found" | Check `requirements.txt` has all packages |
 
 ---
@@ -81,7 +111,11 @@ Before deploying:
 - [ ] Vercel project created
 - [ ] `SECRET_KEY` environment variable set
 - [ ] `GROQ_API_KEY` environment variable set
-- [ ] Vercel Postgres database created
+- [ ] MongoDB Atlas account created
+- [ ] MongoDB cluster created (FREE M0)
+- [ ] Database user created
+- [ ] IP `0.0.0.0/0` whitelisted
+- [ ] `MONGODB_URI` environment variable set
 - [ ] Redeployed after adding env vars
 
 ---
@@ -90,7 +124,16 @@ Before deploying:
 
 **Repository**: `Rudhr07/ai-course-management`
 **Files Ready**: All configured for Vercel
-**Database**: Will use Vercel Postgres (free tier)
+**Database**: MongoDB Atlas (free tier, 512 MB)
 **AI Backend**: Groq API (free tier)
 
-**Estimated Time**: 5-10 minutes for first deployment
+**Estimated Time**: 15-20 minutes for first deployment
+
+---
+
+## 🆓 100% Free Stack
+
+- ✅ **Vercel Hosting**: Free forever
+- ✅ **MongoDB Atlas**: 512 MB free tier
+- ✅ **Groq API**: 14,400 requests/day free
+- ✅ **Total Cost**: $0/month 💰
