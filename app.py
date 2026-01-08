@@ -10,7 +10,7 @@ app = Flask(__name__, instance_relative_config=False)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', os.environ.get('CMS_SECRET', 'dev-secret-change-in-production'))
 
 # Database configuration: PostgreSQL for production, SQLite for local
-DATABASE_URL = os.environ.get('DATABASE_URL')
+DATABASE_URL = os.environ.get('DATABASE_URL') or os.environ.get('POSTGRES_URL')
 
 if DATABASE_URL:
     # Fix for Heroku/Vercel Postgres (uses postgres:// but SQLAlchemy needs postgresql://)
@@ -19,9 +19,14 @@ if DATABASE_URL:
     app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 else:
     # Use SQLite (local development)
-    # Use /tmp for serverless (writable), or local path otherwise
-    if os.environ.get('VERCEL'):
-        # On Vercel without DATABASE_URL, use in-memory database
+    if os.environ.get('VERCEL') or os.environ.get('VERCEL_ENV'):
+        # CRITICAL: SQLite on Vercel won't work for persistent data!
+        # The /tmp directory is ephemeral and resets between requests.
+        # This will cause login/signup to fail because user data won't persist.
+        print("WARNING: Running on Vercel without DATABASE_URL!")
+        print("Please set up Vercel Postgres or configure DATABASE_URL")
+        print("See VERCEL_DEPLOYMENT.md for instructions")
+        # Use in-memory database as fallback (will not persist data!)
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/cms.db'
     else:
         # Local development
@@ -35,7 +40,12 @@ login_manager.login_view = 'login'
 
 # Create database tables automatically on startup (for Vercel)
 with app.app_context():
-    db.create_all()
+    try:
+        db.create_all()
+    except Exception as e:
+        print(f"Database initialization error: {e}")
+        # Re-raise to make error visible in Vercel logs
+        raise
 
 
 # Models
