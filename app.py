@@ -9,24 +9,19 @@ import requests
 app = Flask(__name__, instance_relative_config=False)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', os.environ.get('CMS_SECRET', 'dev-secret-change-in-production'))
 
-# Database configuration: MongoDB Atlas for production, SQLite for local
-MONGODB_URI = os.environ.get('MONGODB_URI')
+# Database configuration: PostgreSQL for production, SQLite for local
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
-if MONGODB_URI:
-    # Use MongoDB Atlas (production on Vercel)
-    app.config['SQLALCHEMY_DATABASE_URI'] = MONGODB_URI
-    # MongoDB specific settings
-    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-        'connect_args': {
-            'ssl': True,
-            'ssl_cert_reqs': 'CERT_NONE'
-        }
-    }
+if DATABASE_URL:
+    # Fix for Heroku/Vercel Postgres (uses postgres:// but SQLAlchemy needs postgresql://)
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 else:
     # Use SQLite (local development)
     # Use /tmp for serverless (writable), or local path otherwise
     if os.environ.get('VERCEL'):
-        # On Vercel, use in-memory database (will reset on each deploy)
+        # On Vercel without DATABASE_URL, use in-memory database
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/cms.db'
     else:
         # Local development
