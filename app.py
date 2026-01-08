@@ -5,7 +5,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import requests
 
-app = Flask(__name__)
+# Disable instance folder for serverless (Vercel)
+app = Flask(__name__, instance_relative_config=False)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', os.environ.get('CMS_SECRET', 'dev-secret-change-in-production'))
 
 # Database configuration: MongoDB Atlas for production, SQLite for local
@@ -23,7 +24,13 @@ if MONGODB_URI:
     }
 else:
     # Use SQLite (local development)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cms.db'
+    # Use /tmp for serverless (writable), or local path otherwise
+    if os.environ.get('VERCEL'):
+        # On Vercel, use in-memory database (will reset on each deploy)
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/cms.db'
+    else:
+        # Local development
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cms.db'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
