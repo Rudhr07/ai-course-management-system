@@ -23,9 +23,10 @@ A modern, AI-powered course management system built with Flask and integrated wi
 
 ### 🤖 **AI Assistant Integration**
 - **Real-time AI Chat**: ChatGPT-like streaming responses
-- **Course Summarization**: AI-powered semester course summaries
-- **Academic Search**: Intelligent search and academic assistance
-- **Ollama Integration**: Local LLM (Llama3) for privacy and speed
+- **Context-Aware Guidance**: AI knows YOUR courses and provides personalized advice
+- **Course Summarization**: AI-powered semester course summaries with study tips
+- **Academic Search**: Intelligent answers based on your actual subjects
+- **Dual Backend**: Ollama (local) or Groq API (cloud) integration
 
 ### 🎨 **Modern UI/UX**
 - **Professional Design**: Clean, modern interface with gradient themes
@@ -45,7 +46,8 @@ A modern, AI-powered course management system built with Flask and integrated wi
 - **Werkzeug 2.3.7** - WSGI utilities
 
 ### **AI Integration**
-- **Ollama** - Local LLM server
+- **Ollama** - Local LLM server (for local development)
+- **Groq API** - Cloud-hosted Llama3 (for production/Vercel)
 - **Llama3** - Language model for AI assistance
 - **Requests 2.31.0** - HTTP client for API communication
 
@@ -117,14 +119,23 @@ A modern, AI-powered course management system built with Flask and integrated wi
 ### **Getting Started**
 1. **Sign Up**: Create an account with your academic details
 2. **Dashboard**: View all 8 semesters on the main dashboard
-3. **Add Courses**: Click on any semester to add/manage courses
-4. **AI Assistant**: Use the floating chat widget for academic help
+3. **Add Courses**: Click on any semester to add/manage courses (include descriptions!)
+4. **AI Assistant**: Use the floating chat widget for personalized academic help
 
-### **AI Assistant Commands**
-- **General Questions**: "Explain data structures"
-- **Course Summaries**: Select a semester and click "Summarize"
-- **Study Tips**: "How should I study for exams?"
-- **Academic Planning**: "Help me plan my semester"
+### **AI Assistant Features**
+- **Context-Aware**: AI has access to ALL your semester courses and descriptions
+- **Personalized Answers**: "How should I prepare for finals?" → Gets advice specific to YOUR subjects
+- **Course Connections**: "How do my courses relate?" → AI analyzes your actual coursework
+- **Study Planning**: "Create a study plan" → Tailored to your current semester
+- **Career Guidance**: "What jobs fit my courses?" → Based on your actual subjects
+
+**💡 Pro Tip**: Add detailed course descriptions for better AI assistance!
+
+### **Example Questions**
+- "What should I focus on this semester?"
+- "How do my Data Structures and Algorithms courses connect?"
+- "Explain concepts from my Machine Learning course"
+- "What career paths match my coursework?"
 
 ---
 
@@ -132,14 +143,55 @@ A modern, AI-powered course management system built with Flask and integrated wi
 
 ### **Environment Variables**
 ```bash
-CMS_SECRET=your-secret-key          # Flask secret key
-OLLAMA_HOST=http://localhost:11434  # Ollama server URL
-OLLAMA_MODEL=llama3                 # AI model name
+SECRET_KEY=your-secret-key          # Flask secret key (required)
+GROQ_API_KEY=gsk_xxx                # Groq API key (for cloud deployment)
+GROQ_MODEL=llama-3.3-70b-versatile  # Groq model (optional)
+OLLAMA_HOST=http://localhost:11434  # Ollama server URL (local only)
+OLLAMA_MODEL=llama3                 # Ollama model name (local only)
 ```
+
+### **AI Backend Priority**
+- **With GROQ_API_KEY set**: Uses Groq Cloud API (works on Vercel, Railway, etc.)
+- **Without GROQ_API_KEY**: Falls back to local Ollama server
 
 ### **Database**
 - Automatically creates `cms.db` on first run
 - No manual database setup required
+
+---
+
+## ☁️ Cloud Deployment (Vercel)
+
+### **Prerequisites**
+1. Get a **free Groq API key** from [console.groq.com](https://console.groq.com/)
+2. Install [Vercel CLI](https://vercel.com/cli) or use the web dashboard
+
+### **Deploy Steps**
+
+1. **Push to GitHub**
+   ```bash
+   git add .
+   git commit -m "Ready for deployment"
+   git push origin main
+   ```
+
+2. **Import to Vercel**
+   - Go to [vercel.com](https://vercel.com)
+   - Click "New Project" → Import your GitHub repo
+
+3. **Set Environment Variables** in Vercel Dashboard:
+   ```
+   SECRET_KEY = your-random-secret-key
+   GROQ_API_KEY = gsk_your_groq_api_key
+   ```
+
+4. **Deploy!** Vercel will auto-build and deploy
+
+### **Why Groq for Cloud?**
+- ✅ **Ollama can't run on Vercel** (requires persistent server + GPU)
+- ✅ **Groq is FREE** with generous rate limits
+- ✅ **Same Llama3 model** - identical AI capabilities
+- ✅ **Faster inference** - Groq's LPU technology
 
 ---
 
@@ -149,6 +201,8 @@ OLLAMA_MODEL=llama3                 # AI model name
 ai-course-management/
 ├── app.py                 # Main Flask application
 ├── requirements.txt       # Python dependencies
+├── vercel.json           # Vercel deployment config
+├── .env.example          # Environment variables template
 ├── logo.png              # Custom logo
 ├── run.ps1 / run.bat     # Launch scripts
 ├── templates/            # HTML templates
@@ -162,7 +216,8 @@ ai-course-management/
 ├── static/
 │   └── js/
 │       └── chatbot.js    # AI chat functionality
-└── cms.db               # SQLite database (auto-created)
+└── instance/
+    └── cms.db            # SQLite database (auto-created)
 ```
 
 ---

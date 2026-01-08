@@ -48,10 +48,47 @@ def load_user(user_id):
 
 
 # AI helpers using Ollama (local Llama3). Expects an Ollama server running locally.
+# For production (Vercel), use Groq API by setting GROQ_API_KEY environment variable.
 import json
 
+# Configuration: Groq API (for production) or Ollama (for local development)
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY')  # Get free key at https://console.groq.com
+GROQ_MODEL = os.environ.get('GROQ_MODEL', 'llama-3.1-8b-instant')  # Fast Llama3 model
+
+# Ollama fallback for local development
 OLLAMA_HOST = os.environ.get('OLLAMA_HOST', 'http://localhost:11434')
-OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'llama3')  # adjust to your local model name
+OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'llama3')
+
+# Determine which AI backend to use
+USE_GROQ = bool(GROQ_API_KEY)
+
+
+def call_groq(prompt, max_tokens=200):
+    """Call Groq API (cloud-hosted Llama3) - works on Vercel."""
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        'Authorization': f'Bearer {GROQ_API_KEY}',
+        'Content-Type': 'application/json'
+    }
+    body = {
+        'model': GROQ_MODEL,
+        'messages': [
+            {'role': 'system', 'content': 'You are a helpful academic assistant. Be concise and helpful.'},
+            {'role': 'user', 'content': prompt}
+        ],
+        'max_tokens': max_tokens,
+        'temperature': 0.3,
+        'stream': False
+    }
+    try:
+        resp = requests.post(url, headers=headers, json=body, timeout=30)
+        resp.raise_for_status()
+        data = resp.json()
+        return data['choices'][0]['message']['content'].strip()
+    except requests.exceptions.Timeout:
+        return "AI response timed out. Please try again."
+    except Exception as e:
+        return f"AI service error: {str(e)}"
 
 
 def call_ollama(prompt, model=None, max_tokens=200):
@@ -88,10 +125,17 @@ def call_ollama(prompt, model=None, max_tokens=200):
         return f"AI service error: {str(e)}"
 
 
+def call_ai(prompt, max_tokens=200):
+    """Universal AI caller - uses Groq in production, Ollama locally."""
+    if USE_GROQ:
+        return call_groq(prompt, max_tokens)
+    return call_ollama(prompt, max_tokens=max_tokens)
+
+
 def ai_search(query):
     """Return (answer_text, resources_list) where resources_list is [{'title','url'}, ...]."""
     prompt = f"Answer briefly: {query}\n\nProvide a concise explanation in 2-3 sentences."
-    text = call_ollama(prompt, max_tokens=150)
+    text = call_ai(prompt, max_tokens=150)
     # Simplified resources since AI might not generate valid URLs
     resources = [
         {"title": "Wikipedia", "url": f"https://en.wikipedia.org/wiki/{query.replace(' ', '_')}"},
@@ -107,7 +151,7 @@ def ai_summarize(semester, courses):
         return f"No courses found for Semester {semester}. Add some courses first!"
     
     prompt = f"Briefly summarize these courses for semester {semester}: {', '.join(names)}. Give 2 sentences and 2 study tips."
-    text = call_ollama(prompt, max_tokens=100)
+    text = call_ai(prompt, max_tokens=100)
     return text
 
 
@@ -234,6 +278,46 @@ def delete_course(course_id):
 
 from flask import Response, stream_with_context, jsonify
 
+def stream_groq_response(prompt, max_tokens=200):
+    """Stream response from Groq API for real-time chat UI."""
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        'Authorization': f'Bearer {GROQ_API_KEY}',
+        'Content-Type': 'application/json'
+    }
+    body = {
+        'model': GROQ_MODEL,
+        'messages': [
+            {'role': 'system', 'content': 'You are a helpful academic assistant. Be concise and helpful.'},
+            {'role': 'user', 'content': prompt}
+        ],
+        'max_tokens': max_tokens,
+        'temperature': 0.3,
+        'stream': True
+    }
+    try:
+        with requests.post(url, headers=headers, json=body, stream=True, timeout=60) as resp:
+            resp.raise_for_status()
+            for line in resp.iter_lines():
+                if line:
+                    line_text = line.decode('utf-8')
+                    if line_text.startswith('data: '):
+                        data_str = line_text[6:]
+                        if data_str.strip() == '[DONE]':
+                            break
+                        try:
+                            data = json.loads(data_str)
+                            if 'choices' in data and len(data['choices']) > 0:
+                                delta = data['choices'][0].get('delta', {})
+                                content = delta.get('content', '')
+                                if content:
+                                    yield content
+                        except Exception:
+                            continue
+    except Exception as e:
+        yield f"[AI error: {str(e)}]"
+
+
 def stream_ollama_response(prompt, model=None, max_tokens=200):
     """Stream response from Ollama for real-time chat UI."""
     model = model or OLLAMA_MODEL
@@ -264,17 +348,36 @@ def stream_ollama_response(prompt, model=None, max_tokens=200):
     except Exception as e:
         yield f"[AI error: {str(e)}]"
 
+
+def stream_ai_response(prompt, max_tokens=200):
+    """Universal streaming - uses Groq in production, Ollama locally."""
+    if USE_GROQ:
+        yield from stream_groq_response(prompt, max_tokens)
+    else:
+        yield from stream_ollama_response(prompt, max_tokens=max_tokens)
+
+
 @app.route('/ai/summarize', methods=['POST'])
 @login_required
 def ai_summarize_route():
     sem = int(request.form.get('semester'))
     courses = Course.query.filter_by(user_id=current_user.id, semester=sem).all()
-    names = [c.name for c in courses]
-    if not names:
-        return jsonify({"result": f"No courses found for Semester {sem}. Add some courses first!"})
-    prompt = f"Briefly summarize these courses for semester {sem}: {', '.join(names)}. Give 2 sentences and 2 study tips."
+    
+    if not courses:
+        return Response("No courses found for this semester. Add some courses first!", mimetype='text/plain')
+    
+    # Build detailed course information
+    course_details = []
+    for c in courses:
+        detail = f"{c.name} ({c.credits} credits)"
+        if c.description:
+            detail += f": {c.description}"
+        course_details.append(detail)
+    
+    prompt = f"Analyze these Semester {sem} courses:\n" + "\n".join([f"- {d}" for d in course_details]) + f"\n\nProvide:\n1. Brief overview of this semester's focus\n2. Key topics covered\n3. 2-3 study tips for managing these subjects together"
+    
     def generate():
-        for chunk in stream_ollama_response(prompt, max_tokens=100):
+        for chunk in stream_ai_response(prompt, max_tokens=200):
             yield chunk
     return Response(stream_with_context(generate()), mimetype='text/plain')
 
@@ -283,9 +386,34 @@ def ai_summarize_route():
 @login_required
 def ai_search_route():
     query = request.form.get('query')
-    prompt = f"Answer briefly: {query}\n\nProvide a concise explanation in 2-3 sentences."
+    
+    # Fetch user's courses from all semesters for context
+    all_courses = Course.query.filter_by(user_id=current_user.id).order_by(Course.semester).all()
+    
+    # Build context string with semester-wise course data
+    context_parts = []
+    if all_courses:
+        context_parts.append("User's Academic Data:")
+        for sem_num in range(1, 9):
+            sem_courses = [c for c in all_courses if c.semester == sem_num]
+            if sem_courses:
+                course_details = []
+                for c in sem_courses:
+                    detail = f"{c.name} ({c.credits} credits)"
+                    if c.description:
+                        detail += f" - {c.description[:100]}"
+                    course_details.append(detail)
+                context_parts.append(f"Semester {sem_num}: {'; '.join(course_details)}")
+    
+    # Build enhanced prompt with user context
+    if context_parts:
+        context_str = "\n".join(context_parts)
+        prompt = f"{context_str}\n\nUser Question: {query}\n\nProvide a helpful answer based on their courses and academic context. If the question relates to their subjects, reference them specifically. Keep response concise (2-4 sentences)."
+    else:
+        prompt = f"Answer briefly: {query}\n\nProvide a concise explanation in 2-3 sentences."
+    
     def generate():
-        for chunk in stream_ollama_response(prompt, max_tokens=150):
+        for chunk in stream_ai_response(prompt, max_tokens=250):
             yield chunk
     return Response(stream_with_context(generate()), mimetype='text/plain')
 

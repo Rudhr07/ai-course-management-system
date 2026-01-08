@@ -12,7 +12,11 @@
       <div class="semester-number">{{ s }}</div>
       <div class="semester-title">Semester {{ s }}</div>
       <div class="semester-subtitle">{{ current_user.courses|selectattr('semester', 'equalto', s)|list|length }} courses enrolled</div>
-      <a href="{{ url_for('semester_view', sem=s) }}" class="btn-primary-custom">
+      <a href="{{ url_for('semester_view', sem=s) }}" class="btn-primary-custom" onclick="event.stopPropagation();">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+        </svg>
         Manage Courses
       </a>
     </div>
@@ -21,47 +25,80 @@
 
   <!-- AI Chatbot Widget (bottom-right) -->
   <div id="ai-chatbot-widget">
-    <button id="ai-chatbot-button" class="chatbot-toggle">
+    <button id="ai-chatbot-button" class="chatbot-toggle" aria-label="Open AI Assistant">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-        <circle cx="9" cy="10" r="1"></circle>
-        <circle cx="15" cy="10" r="1"></circle>
+        <circle cx="9" cy="10" r="1" fill="currentColor"></circle>
+        <circle cx="15" cy="10" r="1" fill="currentColor"></circle>
         <path d="M9 14s1 1 3 1 3-1 3-1"></path>
       </svg>
+      <span class="chatbot-pulse"></span>
     </button>
     
     <div id="ai-chatbot-box" class="chatbot-panel">
       <div class="chatbot-header">
         <div class="chatbot-title">
-          <div class="chatbot-avatar">🤖</div>
+          <div class="chatbot-avatar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2M7.5 13A1.5 1.5 0 0 0 6 14.5A1.5 1.5 0 0 0 7.5 16A1.5 1.5 0 0 0 9 14.5A1.5 1.5 0 0 0 7.5 13m9 0a1.5 1.5 0 0 0-1.5 1.5a1.5 1.5 0 0 0 1.5 1.5a1.5 1.5 0 0 0 1.5-1.5a1.5 1.5 0 0 0-1.5-1.5M9 18v.5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5V18"></path>
+            </svg>
+          </div>
           <div>
             <div class="chatbot-name">AI Assistant</div>
-            <div class="chatbot-status">Online</div>
+            <div class="chatbot-status">
+              <span class="status-dot"></span>
+              Powered by Llama3
+            </div>
           </div>
         </div>
-        <button id="ai-chatbot-close" class="chatbot-close">×</button>
+        <button id="ai-chatbot-close" class="chatbot-close" aria-label="Close chat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
       
       <div id="ai-chatbot-messages" class="chatbot-messages">
         <div class="bot-message initial">
-          Hi! I'm here to help with your courses. Ask me anything or use the quick actions below.
+          <div class="message-avatar">🤖</div>
+          <div class="message-content">
+            <p>Hi! I'm your AI academic assistant. I can help you with:</p>
+            <ul>
+              <li>Study tips and guidance</li>
+              <li>Semester planning</li>
+              <li>Course summaries</li>
+            </ul>
+            <p>Ask me anything or use the quick actions below!</p>
+          </div>
         </div>
       </div>
 
       <div class="chatbot-quick-actions">
-        <button class="quick-action" onclick="document.getElementById('ai-query').value='What should I study today?'; document.getElementById('ai-chat-form').dispatchEvent(new Event('submit'));">
+        <button class="quick-action" onclick="document.getElementById('ai-query').value='What should I study today based on my courses?'; document.getElementById('ai-chat-form').dispatchEvent(new Event('submit'));">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
+          </svg>
           Study Tips
         </button>
-        <button class="quick-action" onclick="document.getElementById('ai-query').value='Help me plan my semester'; document.getElementById('ai-chat-form').dispatchEvent(new Event('submit'));">
+        <button class="quick-action" onclick="document.getElementById('ai-query').value='Help me plan my semester schedule'; document.getElementById('ai-chat-form').dispatchEvent(new Event('submit'));">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
           Plan Semester
         </button>
       </div>
 
       <form id="ai-chat-form" class="chatbot-form">
         <div class="chatbot-input-group">
-          <input id="ai-query" name="query" type="text" placeholder="Ask me anything..." class="chatbot-input" required>
-          <button type="submit" class="chatbot-send">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <input id="ai-query" name="query" type="text" placeholder="Ask me anything..." class="chatbot-input" required autocomplete="off">
+          <button type="submit" class="chatbot-send" aria-label="Send message">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="22" y1="2" x2="11" y2="13"></line>
               <polygon points="22,2 15,22 11,13 2,9"></polygon>
             </svg>
@@ -80,12 +117,18 @@
           <option value="{{ s }}">Semester {{ s }}</option>
           {% endfor %}
         </select>
-        <button type="submit" class="btn-primary-custom">Summarize</button>
+        <button type="submit" class="btn-primary-custom chatbot-summarize-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          Summarize
+        </button>
       </form>
     </div>
   </div>
 
   <style>
+    /* === CHATBOT WIDGET STYLES === */
     #ai-chatbot-widget {
       position: fixed;
       bottom: 24px;
@@ -94,62 +137,91 @@
       font-family: inherit;
     }
 
-    .semester-card {
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .semester-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-lg);
-    }
-
     .chatbot-toggle {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+      width: 60px;
+      height: 60px;
+      border-radius: var(--radius-full);
+      background: var(--gradient-primary);
       border: none;
       color: white;
       cursor: pointer;
-      box-shadow: var(--shadow-lg);
-      transition: all 0.3s ease;
+      box-shadow: var(--shadow-lg), 0 0 40px rgba(6, 182, 212, 0.4);
+      transition: var(--transition-base);
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
 
     .chatbot-toggle:hover {
       transform: scale(1.1);
-      box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+      box-shadow: var(--shadow-lg), 0 0 60px rgba(6, 182, 212, 0.5);
+    }
+    
+    .chatbot-pulse {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius-full);
+      background: var(--gradient-primary);
+      animation: pulse 2s infinite;
+      z-index: -1;
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 0.5;
+      }
+      70% {
+        transform: scale(1.5);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1.5);
+        opacity: 0;
+      }
     }
 
     .chatbot-panel {
       position: absolute;
-      bottom: 70px;
+      bottom: 80px;
       right: 0;
-      width: 380px;
+      width: 400px;
       max-width: calc(100vw - 48px);
-      background: var(--bg-primary);
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--shadow-lg), 0 0 60px rgba(6, 182, 212, 0.1);
       border: 1px solid var(--border-light);
       display: none;
       animation: slideUp 0.3s ease;
+      overflow: hidden;
     }
 
     .chatbot-panel.open {
       display: block;
     }
+    
+    .chatbot-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient-primary);
+    }
 
     @keyframes slideUp {
       from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(20px) scale(0.95);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
       }
     }
 
@@ -157,165 +229,251 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid var(--border-light);
+      padding: var(--space-md) var(--space-lg);
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-secondary);
     }
 
     .chatbot-title {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: var(--space-sm);
     }
 
     .chatbot-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary) 0%, var(--success) 100%);
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-lg);
+      background: var(--gradient-primary);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.25rem;
+      color: white;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
     }
 
     .chatbot-name {
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text-primary);
-      font-size: 0.875rem;
+      font-size: 0.95rem;
     }
 
     .chatbot-status {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
       font-size: 0.75rem;
-      color: var(--success);
+      color: var(--text-muted);
+    }
+    
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      animation: blink 2s infinite;
+    }
+    
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
 
     .chatbot-close {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
       border: none;
-      background: var(--bg-secondary);
+      background: var(--bg-tertiary);
       color: var(--text-secondary);
       cursor: pointer;
-      font-size: 1.25rem;
-      transition: all 0.2s ease;
+      transition: var(--transition-base);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .chatbot-close:hover {
-      background: var(--border-light);
+      background: var(--bg-elevated);
       color: var(--text-primary);
     }
 
     .chatbot-messages {
-      height: 300px;
+      height: 320px;
       overflow-y: auto;
-      padding: 1rem 1.25rem;
+      padding: var(--space-lg);
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: var(--space-md);
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-light) transparent;
+    }
+    
+    .chatbot-messages::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .chatbot-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    .chatbot-messages::-webkit-scrollbar-thumb {
+      background: var(--border-light);
+      border-radius: var(--radius-full);
     }
 
-    .bot-message, .user-message {
-      max-width: 85%;
-      padding: 0.75rem 1rem;
+    .bot-message, .user-message, .chat-msg {
+      max-width: 90%;
+      padding: var(--space-md);
       border-radius: var(--radius-lg);
       font-size: 0.875rem;
-      line-height: 1.5;
+      line-height: 1.6;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .bot-message {
-      background: var(--bg-secondary);
+    .bot-message, .chat-msg.bot {
+      background: var(--bg-tertiary);
       color: var(--text-primary);
       align-self: flex-start;
-      border-bottom-left-radius: 0.25rem;
+      border-bottom-left-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+    }
+    
+    .bot-message.initial {
+      display: flex;
+      gap: var(--space-md);
+      max-width: 100%;
+      background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+      border: 1px solid var(--border-light);
+    }
+    
+    .bot-message.initial .message-avatar {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    
+    .bot-message.initial .message-content {
+      flex: 1;
+    }
+    
+    .bot-message.initial .message-content p {
+      margin: 0 0 var(--space-sm) 0;
+    }
+    
+    .bot-message.initial .message-content ul {
+      margin: 0 0 var(--space-sm) 0;
+      padding-left: var(--space-lg);
+      color: var(--text-secondary);
+    }
+    
+    .bot-message.initial .message-content li {
+      margin-bottom: var(--space-xs);
     }
 
-    .user-message {
-      background: var(--primary);
+    .user-message, .chat-msg.user {
+      background: var(--gradient-primary);
       color: white;
       align-self: flex-end;
-      border-bottom-right-radius: 0.25rem;
-    }
-
-    .bot-message.initial {
-      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-      border: 1px solid var(--border-light);
+      border-bottom-right-radius: var(--radius-sm);
     }
 
     .chatbot-quick-actions {
       display: flex;
-      gap: 0.5rem;
-      padding: 0 1.25rem;
-      margin-bottom: 1rem;
+      gap: var(--space-sm);
+      padding: 0 var(--space-lg);
+      margin-bottom: var(--space-md);
     }
 
     .quick-action {
       flex: 1;
-      padding: 0.5rem 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-xs);
+      padding: var(--space-sm) var(--space-md);
       border-radius: var(--radius-md);
       border: 1px solid var(--border-light);
-      background: var(--bg-secondary);
+      background: var(--bg-tertiary);
       color: var(--text-secondary);
-      font-size: 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: var(--transition-base);
     }
 
     .quick-action:hover {
-      background: var(--primary);
+      background: var(--gradient-primary);
       color: white;
-      border-color: var(--primary);
+      border-color: transparent;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
     }
 
     .chatbot-form {
-      padding: 0 1.25rem 1rem;
+      padding: 0 var(--space-lg) var(--space-md);
     }
 
     .chatbot-input-group {
       display: flex;
-      gap: 0.5rem;
+      gap: var(--space-sm);
     }
 
     .chatbot-input {
       flex: 1;
-      border: 1.5px solid var(--border-light);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
       border-radius: var(--radius-md);
-      padding: 0.75rem 1rem;
+      padding: var(--space-md);
       font-size: 0.875rem;
+      color: var(--text-primary);
       outline: none;
-      transition: all 0.2s ease;
+      transition: var(--transition-base);
+    }
+    
+    .chatbot-input::placeholder {
+      color: var(--text-muted);
     }
 
     .chatbot-input:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+      box-shadow: 0 0 0 3px var(--primary-glow);
     }
 
     .chatbot-send {
-      width: 44px;
-      height: 44px;
+      width: 48px;
+      height: 48px;
       border-radius: var(--radius-md);
       border: none;
-      background: var(--primary);
+      background: var(--gradient-primary);
       color: white;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: var(--transition-base);
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
     }
 
     .chatbot-send:hover {
-      background: var(--primary-hover);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
     }
 
     .chatbot-divider {
-      margin: 1rem 1.25rem;
+      margin: var(--space-md) var(--space-lg);
       text-align: center;
       position: relative;
       color: var(--text-muted);
       font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .chatbot-divider::before {
@@ -325,36 +483,48 @@
       left: 0;
       right: 0;
       height: 1px;
-      background: var(--border-light);
+      background: var(--border-subtle);
       z-index: 1;
     }
 
     .chatbot-divider span {
-      background: var(--bg-primary);
-      padding: 0 1rem;
+      background: var(--bg-glass);
+      padding: 0 var(--space-md);
       position: relative;
       z-index: 2;
     }
 
     .chatbot-summarize {
-      padding: 0 1.25rem 1.25rem;
+      padding: 0 var(--space-lg) var(--space-lg);
       display: flex;
-      gap: 0.75rem;
+      gap: var(--space-sm);
     }
 
     .chatbot-select {
       flex: 1;
-      border: 1.5px solid var(--border-light);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
       border-radius: var(--radius-md);
-      padding: 0.75rem 1rem;
+      padding: var(--space-md);
       font-size: 0.875rem;
+      color: var(--text-primary);
       outline: none;
-      background: var(--bg-primary);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
     }
 
     .chatbot-select:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+    
+    .chatbot-summarize-btn {
+      padding: var(--space-md) var(--space-lg);
+      white-space: nowrap;
     }
 
     @media (max-width: 768px) {
@@ -365,9 +535,47 @@
 
       .chatbot-panel {
         width: calc(100vw - 32px);
-        bottom: 70px;
+        bottom: 80px;
         right: -8px;
       }
+      
+      .chatbot-messages {
+        height: 280px;
+      }
+    }
+    
+    /* === TYPING INDICATOR === */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: var(--space-md);
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-lg);
+      border-bottom-left-radius: var(--radius-sm);
+      align-self: flex-start;
+      border: 1px solid var(--border-subtle);
+    }
+    
+    .typing-indicator span {
+      width: 8px;
+      height: 8px;
+      border-radius: var(--radius-full);
+      background: var(--primary);
+      animation: typing 1.4s infinite;
+    }
+    
+    .typing-indicator span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    
+    .typing-indicator span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-4px); opacity: 1; }
     }
   </style>
 
