@@ -1,6 +1,6 @@
 # 🎓 AI Course Management System
 
-> **Demo Video**: (https://drive.google.com/file/d/1i2hNeljiZyZt-EjmqYQrfsThlWAGfrgM/view)
+> **Demo Video**: (https://drive.google.com/file/d/1pTY26YxccyQUs-4vFFiB3Xv4eeOFWoJe/view?usp=sharing))
 
 A modern, AI-powered course management system built with Flask and integrated with Ollama for intelligent academic assistance.
 
